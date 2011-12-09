@@ -1,0 +1,18 @@
+To keep it short, I learnt Multi-threaded programming, synchronization concepts and implementing and visualizing a textbook algorithm using advanced features of Java programming language. It was an awesome learning experience.
+
+Debugging a program which communicates with others on network is not as easy as I thought before.
+
+Initially, I developed my receiver thread as a single thread for listening to messages from other processes. Program would read object on each socket sequentially in a while loop. This method worked most of the time depending on random interval chosen while generating UPDATE messages. But the results were not consistent.
+Next, I changed the receiver into 3 different independent receiver threads running on each socket. Also while multicasting I was creating new objects on outputstream and inputstream every time I called multicast and received objects from processes. I learned that this procedure is inefficient and not necessary. So I declared objectoutputstream and objectinputstream as static sockets and set up the stream once connection was established between all the processes.
+
+Now multicasting was working fine but I was not able to achieve total ordering. After hours of debugging, I realized where I was going wrong. Then I tried to visualize what is happening internally and tried to provide the tweaks accordingly.
+
+The problem was I used to get all ACK messages as expected but many of them did not help in removing a message from update queue and committing accordingly.
+
+This was happening because there were scenarios where I would get ACK for an UPDATE, where the corresponding UPDATE had not reached the process yet due to delay. So those ACKs were going wasted and did not help in removing messages from UPDATE Queue.
+
+To overcome this problem, I collected all missed ACK in a separate Queue and whenever UPDATE occurred I used to check from ACKs in the new queue along with received ACKs. This did not help the case much because total ordering was not maintained.
+
+Then I thought of one more solution which worked seamlessly and maintained total ordering. whenever I collected ACKS I put them in a Hash Map, so in this way I would see the total number of ACKs for an  UPDATE message and whenever I got 3 ACKS I removed from the UPDATE Queue. This method got things working because I was reusing the ACKS received earlier in some way and I was not missing any of it.
+
+So finally I  got the right implementation and learnt the practical aspects of implementing an algorithm.
